@@ -1,0 +1,43 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.prettier": true
+  },
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#3558a3",
+    "activityBar.activeBackground": "#3558a3",
+    "activityBar.foreground": "#ffffff",
+    "activityBar.inactiveForeground": "#fae4f6",
+    "activityBar.activeBorder": "#ffffff",
+    "activityBarBadge.background": "#fae4f6",
+    "activityBarBadge.foreground": "#3558a3",
+    "titleBar.activeBackground": "#3558a3",
+    "titleBar.inactiveBackground": "#3558a3",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveForeground": "#e7e7e799",
+    "statusBar.background": "#3558a3",
+    "statusBarItem.hoverBackground": "#626262",
+    "statusBar.foreground": "#ffffff"
+  },
+  "cSpell.words": [
+    "antd",
+    "cssinjs",
+    "datasource",
+    "immer",
+    "issuetype",
+    "Itim",
+    "kanban",
+    "lilita",
+    "logwork",
+    "logworks",
+    "nqhuy",
+    "nunito",
+    "sider",
+    "Siderbar",
+    "timetracking",
+    "worklog",
+    "worklogs",
+    "zustand"
+  ]
+}
