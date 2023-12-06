@@ -17,3 +17,38 @@ npm run start
 ```
 npm run dev
 ```
+
+## Environment setup
+
+Example, I have this URL: **https://twoline.atlassian.net/jira/software/c/projects/ABC/boards/123/backlog?issueLimit=100&view=detail** to view my Jira.
+
+1. Type `cp .env.example .env` to create your own `.env` file.
+2. Update other fields in `.env`:
+   - `WORKER_JR_USERNAME` - Your Jira username
+   - `WORKER_JR_PASSWORD` - Your Jira password (or your API token)
+   - `WORKER_JR_BOARD_ID` - Your Jira board ID, Ex: `123` in example URL.
+   - `JIRA_BOARD_NAME_FILTER` - Filter your board name, Ex: `ABC` in the example URL.
+   - `BASE_JIRA_API` - Your org Jira domain, Ex: `https://twoline.atlassian.net` in the example URL.
+
+> To create your API token, go to [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/) to read more about your own API token.
+
+## Personal use
+
+I developed some APIs to support for personal case:
+
+- Summary your worklog by date or by member: `[POST] - /worklog-summary/:boardID?date={DATE}&accountId={ACCOUNT_ID}`.
+- Some others is in Development mode
+
+In your request's body, pls send with your authenticate data:
+
+```json
+{
+  "username": "JIRA_USERNAME",
+  "accessToken": "JIRA_PASSWORD_OR_API_TOKEN"
+}
+```
+
+## API references
+
+- [JIRA Cloud Platform - REST API v2](https://developer.atlassian.com/cloud/jira/platform/rest/v2/intro/)
+- [JIRA Software Cloud - REST API](https://developer.atlassian.com/cloud/jira/software/rest/intro)

@@ -25,23 +25,17 @@ export class AppController {
     private readonly jiraHandlerService: IJiraHandlersService,
   ) {}
 
-  @Post('worklog-summary')
+  @Post('myself')
   public async getMyWorklogSummary(@Body() auth: JiraAuthDTO) {
     const currentUser = await this.jiraService.getMyself(
       auth.username,
       auth.accessToken,
     );
-    const { worklogData, issueData } =
-      await this.jiraHandlerService.mySummaryWorklog(auth, 809);
-    return {
-      currentUser,
-      worklogData,
-      issueData,
-    };
+    return currentUser;
   }
 
   @Post('worklog-summary/:boardId')
-  public async getHello(
+  public async worklogSummaryBoardID(
     @Param('boardId') boardId: string,
     @Query('date') date: string,
     @Query('accountId') accountId: string,

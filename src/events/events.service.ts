@@ -39,8 +39,7 @@ export class EventsService implements IEventService {
     }
   }
 
-  // Run at 20h30 everyday in Week
-  @Cron('35 17 * * 1-5', {
+  @Cron('35 16 * * 1-5', {
     name: 'daily_report_worklog',
     timeZone: 'Asia/Ho_Chi_Minh',
   })
