@@ -40,7 +40,7 @@ export class EventsService implements IEventService {
   }
 
   // Run at 20h30 everyday in Week
-  @Cron('35 17 * * 1-5', {
+  @Cron('28 13 * * 1-5', {
     name: 'daily_report_worklog',
     timeZone: 'Asia/Ho_Chi_Minh',
   })
@@ -48,7 +48,8 @@ export class EventsService implements IEventService {
     const today = dayjs().format('DD/MM/YYYY');
     Logger.log(` - Create worklog-report daily (${today})`);
     try {
-      return this.sendDailyWorklogSummary(today);
+      Logger.log('Run');
+      // return this.sendDailyWorklogSummary(today);
     } catch (error) {
       console.error("Error when run cron 'Daily Report Worklog':", error);
       throw error;
