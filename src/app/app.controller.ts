@@ -1,4 +1,13 @@
-import { Controller, Param, Post, Inject, Body, Query } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Post,
+  Inject,
+  Body,
+  Query,
+  BadRequestException,
+  Get,
+} from '@nestjs/common';
 // import { AppService } from './app.service';
 // import { IJiraService, JIRA_SERVICE } from 'src/jira/interfaces';
 import {
@@ -8,22 +17,53 @@ import {
   TSummaryWorkLogResponse,
   TSummaryWorklogDataByDate,
 } from 'src/jira/interfaces/jira-handler.service.interface';
-// import { EVENT_SERVICE, IEventService } from 'src/events/interfaces';
 import { JiraAuthDTO } from './dto';
 import { arrayToDictionary } from 'helpers/array-to-dictionary';
 import { TArrayElement, TValueOf } from 'types';
 import { IJiraService, JIRA_SERVICE } from 'src/jira/interfaces';
-// import { IJiraService, JIRA_SERVICE } from 'src/jira/interfaces';
+import { EVENT_SERVICE, IEventService } from 'src/events/interfaces';
+import { IFirebaseService, FIREBASE_SERVICE } from '../firebase/interfaces';
+import {
+  CreateGEventsDTO,
+  GEventAttendeeResStatusEnum,
+} from './dto/google-event.dto';
 
 @Controller()
 export class AppController {
   constructor(
-    // private readonly appService: AppService,
+    @Inject(EVENT_SERVICE)
+    private readonly eventService: IEventService,
     @Inject(JIRA_SERVICE)
     private readonly jiraService: IJiraService,
     @Inject(JIRA_HANDLERS_SERVICE)
     private readonly jiraHandlerService: IJiraHandlersService,
+    @Inject(FIREBASE_SERVICE)
+    private readonly firebaseService: IFirebaseService,
   ) {}
+
+  @Get('meetings/daily-scrum')
+  public async triggerDailyScrumEvent() {
+    return await this.eventService.sendDailyScrumMeeting();
+  }
+
+  @Post('meetings/daily-scrum')
+  public async createDailyScrumEvent(@Body() { events }: CreateGEventsDTO) {
+    if (events.length === 0) throw new BadRequestException('No Event found!');
+    const { id, summary, startedAt, meetingLink, eventLink, attendees } =
+      events[0];
+    const newEvent = await this.firebaseService.createDailyEvent({
+      name: summary,
+      startedAt: new Date(startedAt),
+      meetingLink,
+      eventId: id,
+      eventLink,
+      attendees: attendees
+        .filter((a) => a.status !== GEventAttendeeResStatusEnum.DECLINED)
+        .map((a) => a.username),
+    });
+
+    return newEvent;
+  }
 
   @Post('myself')
   public async getMyWorklogSummary(@Body() auth: JiraAuthDTO) {
@@ -64,6 +104,13 @@ export class AppController {
       );
       return acc;
     }, {});
+  }
+
+  @Post('worklog-summary/sprint/send')
+  public async sendSprintWorklogSummary(@Query('sprintId') sprintId: string) {
+    return await this.eventService.sendSprintWorklogSummary(
+      sprintId && Number(sprintId),
+    );
   }
 
   private transformWorklogWithIssueData(

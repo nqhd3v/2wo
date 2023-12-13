@@ -197,6 +197,24 @@ export class JiraService implements IJiraService {
     }
   }
 
+  public async getSprintByID(
+    u: string,
+    p: string,
+    sprintId: number,
+  ): Promise<TSprintJira> {
+    try {
+      const res = await this.request<AxiosResponse<TSprintJira>>(
+        JIRA_API.sprint.ONE(sprintId),
+        { username: u, password: p },
+      );
+
+      return res.data;
+    } catch (error) {
+      console.error(`Error when get worklogs by sprint#${sprintId}:`, error);
+      throw error;
+    }
+  }
+
   public async getWorklogsByActiveSprint(
     u: string,
     p: string,
@@ -204,10 +222,45 @@ export class JiraService implements IJiraService {
   ) {
     const activeSprint = await this.getActiveSprintByBoardID(u, p, boardId);
     if (!activeSprint) throw new BadRequestException('No active sprint found!');
+    const worklogs = await this.getWorklogDataBySprintId(u, p, activeSprint.id);
+
+    return {
+      sprint: activeSprint,
+      logs: worklogs,
+    };
+  }
+
+  public async getWorklogsBySprintId(
+    u: string,
+    p: string,
+    sprintId: number,
+  ): Promise<{ sprint: TSprintJira; logs: TWorklogResponse[] }> {
+    try {
+      const sprint = await this.getSprintByID(u, p, sprintId);
+      if (!sprint)
+        throw new BadRequestException(`Sprint (${sprintId}) not found`);
+
+      const worklogs = await this.getWorklogDataBySprintId(u, p, sprintId);
+
+      return {
+        sprint,
+        logs: worklogs,
+      };
+    } catch (error) {
+      console.error(`Error when get worklogs by sprint#${sprintId}:`, error);
+      throw error;
+    }
+  }
+
+  private async getWorklogDataBySprintId(
+    u: string,
+    p: string,
+    sprintId: number,
+  ): Promise<TWorklogResponse[]> {
     try {
       const issuePagination = await this.request<
         AxiosResponse<TIssuePagination>
-      >(JIRA_API.worklog.BY_SPRINT(activeSprint.id), {
+      >(JIRA_API.worklog.BY_SPRINT(sprintId), {
         username: u,
         password: p,
       });
@@ -257,10 +310,7 @@ export class JiraService implements IJiraService {
 
       return Object.values(worklogByIssues);
     } catch (error) {
-      console.error(
-        `Error when get worklogs by active-sprint#${activeSprint.id}:`,
-        error,
-      );
+      console.error(`Error when get worklogs by sprint#${sprintId}:`, error);
       throw error;
     }
   }

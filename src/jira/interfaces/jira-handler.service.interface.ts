@@ -1,5 +1,6 @@
 import { JiraAuthDTO } from 'src/app/dto';
 import { TArrayElement } from 'types';
+import { TSprintJira } from 'types/jira';
 
 export type TSummaryWorklog = {
   accountId: string;
@@ -13,15 +14,14 @@ export type TSummaryWorklogDataByDate = {
   };
 };
 
-export type TSummaryWorkLogResponse = Record<
-  string,
-  Omit<TSummaryWorklog, 'details'> & {
+export type TSummaryWorkLogResponse = {
+  [accountId: string]: Omit<TSummaryWorklog, 'details'> & {
     details: Record<
       string,
       Pick<TArrayElement<TSummaryIssueData>, 'summary' | 'timeSpentSeconds'>
     >;
-  }
->;
+  };
+};
 
 export type TSummaryIssueData = {
   key: string;
@@ -39,9 +39,11 @@ export interface IJiraHandlersService {
   ): Promise<{
     worklogData: TSummaryWorklogDataByDate;
     issueData: TSummaryIssueData;
+    sprint: TSprintJira;
   }>;
-  summaryWorklog(): Promise<{
+  summaryWorklog(sprintId?: number): Promise<{
     worklogData: TSummaryWorklogDataByDate;
     issueData: TSummaryIssueData;
+    sprint: TSprintJira;
   }>;
 }

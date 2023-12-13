@@ -2,7 +2,7 @@ import * as dayjs from 'dayjs';
 import { TSummaryWorklog } from 'src/jira/interfaces';
 import { secsToString } from './time.transform';
 
-export const generateWorklogReport = (
+export const generateWorklogReportByDate = (
   worklogByMembers: TSummaryWorklog[],
   date?: string,
 ) => {

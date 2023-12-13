@@ -6,6 +6,7 @@ import {
   JIRA_HANDLERS_SERVICE,
   TSummaryWorklog,
 } from 'src/jira/interfaces';
+import { arrayToDictionary } from 'helpers/array-to-dictionary';
 
 @Injectable()
 export class EventHandlersService implements IEventHandlersService {
@@ -31,9 +32,48 @@ export class EventHandlersService implements IEventHandlersService {
     }
   }
 
-  // public async weeklyWorklogReport(startDate): Promise<TSummaryWorklogDataByDate> {
-  //   const { worklogData, issueData } =
-  //     await this.jiraHandlerService.summaryWorklog();
+  public async sprintWorklogReport(sprintId?: number) {
+    const { worklogData, issueData, sprint } =
+      await this.jiraHandlerService.summaryWorklog(sprintId);
+    try {
+      const issueDic = arrayToDictionary(issueData, 'key');
+      const worklogDataByDate = Object.keys(worklogData).reduce(
+        (accWorklogByDate, date) => {
+          accWorklogByDate[date] = Object.keys(worklogData[date]).reduce(
+            (acc, accountId) => {
+              const { details: timeSpentByIssue } =
+                worklogData[date][accountId];
 
-  // }
+              acc[accountId] = {
+                ...worklogData[date][accountId],
+                details: Object.keys(timeSpentByIssue).reduce(
+                  (accTimeSpent, issueKey) => {
+                    accTimeSpent[issueKey] = {
+                      summary: issueDic[issueKey].summary,
+                      timeSpentSeconds: timeSpentByIssue[issueKey],
+                    };
+                    return accTimeSpent;
+                  },
+                  {},
+                ),
+              };
+
+              return acc;
+            },
+            {},
+          );
+          return accWorklogByDate;
+        },
+        {},
+      );
+
+      return {
+        sprint,
+        worklog: worklogDataByDate,
+      };
+    } catch (error) {
+      console.error('Error when generate pre-data for Worker:', error);
+      throw error;
+    }
+  }
 }

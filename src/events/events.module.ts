@@ -7,9 +7,11 @@ import { JiraModule } from 'src/jira/jira.module';
 import { EVENT_HANDLERS_SERVICE, EVENT_SERVICE } from './interfaces';
 import { EventHandlersService } from './event-handler.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
   imports: [
+    FirebaseModule,
     HttpModule,
     JiraModule,
     ScheduleModule.forRoot(),

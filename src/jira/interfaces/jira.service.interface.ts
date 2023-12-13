@@ -28,6 +28,11 @@ export interface IJiraService {
     p: string,
     boardId: number,
   ): Promise<TSprintJira | null>;
+  getSprintByID(
+    u: string,
+    p: string,
+    sprintId: number,
+  ): Promise<TSprintJira | null>;
   // ISSUE
   getIssuesBySprintID(
     u: string,
@@ -44,5 +49,10 @@ export interface IJiraService {
     u: string,
     p: string,
     boardId: number,
-  ): Promise<TWorklogResponse[]>;
+  ): Promise<{ sprint: TSprintJira; logs: TWorklogResponse[] }>;
+  getWorklogsBySprintId(
+    u: string,
+    p: string,
+    sprintId: number,
+  ): Promise<{ sprint: TSprintJira; logs: TWorklogResponse[] }>;
 }

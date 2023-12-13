@@ -1,8 +1,8 @@
 {
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.fixAll.prettier": true
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.prettier": "explicit"
   },
   "workbench.colorCustomizations": {
     "activityBar.background": "#3558a3",
@@ -24,6 +24,7 @@
     "antd",
     "cssinjs",
     "datasource",
+    "firestore",
     "immer",
     "issuetype",
     "Itim",
@@ -38,6 +39,7 @@
     "timetracking",
     "worklog",
     "worklogs",
+    "WOWO",
     "zustand"
   ]
 }

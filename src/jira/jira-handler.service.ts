@@ -18,31 +18,36 @@ export class JiraHandlersService implements IJiraHandlersService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async summaryWorklog() {
-    // Get data
-    const issues = await this.jiraService.getWorklogsByActiveSprint(
-      this.configService.get<string>('WORKER_JR_USERNAME'),
-      this.configService.get<string>('WORKER_JR_PASSWORD'),
-      this.configService.get<number>('WORKER_JR_BOARD_ID'),
-    );
+  public async summaryWorklog(sprintId?: number) {
+    const { logs: issues, sprint } = sprintId
+      ? await this.jiraService.getWorklogsBySprintId(
+          this.configService.get<string>('WORKER_JR_USERNAME'),
+          this.configService.get<string>('WORKER_JR_PASSWORD'),
+          sprintId,
+        )
+      : await this.jiraService.getWorklogsByActiveSprint(
+          this.configService.get<string>('WORKER_JR_USERNAME'),
+          this.configService.get<string>('WORKER_JR_PASSWORD'),
+          this.configService.get<number>('WORKER_JR_BOARD_ID'),
+        );
 
-    return this.summaryWorklogByWorklogData(issues);
+    const { worklogData, issueData } = this.summaryWorklogByWorklogData(issues);
+    return { worklogData, issueData, sprint };
   }
 
   public async mySummaryWorklog(
     { username, accessToken }: JiraAuthDTO,
     boardId: number,
-  ): Promise<{
-    worklogData: TSummaryWorklogDataByDate;
-    issueData: TSummaryIssueData;
-  }> {
-    const issues = await this.jiraService.getWorklogsByActiveSprint(
-      username,
-      accessToken,
-      boardId,
-    );
+  ) {
+    const { logs: issues, sprint } =
+      await this.jiraService.getWorklogsByActiveSprint(
+        username,
+        accessToken,
+        boardId,
+      );
 
-    return this.summaryWorklogByWorklogData(issues);
+    const { worklogData, issueData } = this.summaryWorklogByWorklogData(issues);
+    return { worklogData, issueData, sprint };
   }
 
   private summaryWorklogByWorklogData(issues: TWorklogResponse[]): {
