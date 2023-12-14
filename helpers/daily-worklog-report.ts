@@ -52,6 +52,11 @@ export const generateWorklogReportByDate = (
                     )}</b></i>`,
                   },
                 },
+                {
+                  textParagraph: {
+                    text: `<i>Improve this style by creating new Pull Request <a href="https://github.com/ld3v/2wo">here</a></i>`,
+                  },
+                },
               ],
             },
           ],
