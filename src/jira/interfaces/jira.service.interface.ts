@@ -39,6 +39,17 @@ export interface IJiraService {
     p: string,
     sprintID: number,
   ): Promise<TIssuePagination>;
+  getStoriesTodoByBoardID(
+    u: string,
+    p: string,
+    boardID: number,
+  ): Promise<TIssuePagination>;
+  getSubImpByBoardID(
+    u: string,
+    p: string,
+    boardID: number,
+    storyIds?: number[],
+  ): Promise<TIssuePagination>;
   // WORKLOG
   getWorklogsByIssueID(
     u: string,

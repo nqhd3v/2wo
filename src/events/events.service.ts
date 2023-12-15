@@ -152,7 +152,7 @@ export class EventsService implements IEventService {
     }
   }
 
-  @Cron('35 16 * * 1-5', {
+  @Cron('15 17 * * 1-5', {
     name: 'daily_report_worklog',
     timeZone: 'Asia/Ho_Chi_Minh',
   })

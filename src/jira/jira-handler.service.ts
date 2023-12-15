@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import * as dayjs from 'dayjs';
 import { TWorklogResponse } from 'types/jira';
 import { JiraAuthDTO } from 'src/app/dto';
+import { TJiraIssue, TStoryTodo } from 'types/jira/issue.type';
 
 @Injectable()
 export class JiraHandlersService implements IJiraHandlersService {
@@ -94,6 +95,78 @@ export class JiraHandlersService implements IJiraHandlersService {
     return {
       worklogData,
       issueData,
+    };
+  }
+  public async getStoriesTodoByBoardId(boardId: number): Promise<{
+    remainCount: number;
+    data: TStoryTodo[];
+  }> {
+    const storiesPagination = await this.jiraService.getStoriesTodoByBoardID(
+      this.configService.get<string>('WORKER_JR_USERNAME'),
+      this.configService.get<string>('WORKER_JR_PASSWORD'),
+      boardId,
+    );
+
+    return {
+      remainCount: Math.max(
+        storiesPagination.total - storiesPagination.maxResults,
+        0,
+      ),
+      data: storiesPagination.issues.map((issue) => ({
+        id: issue.id,
+        key: issue.key,
+        summary: issue.fields.summary,
+        timetracking: issue.fields.timetracking,
+        // assignee: issue.fields.assignee
+      })),
+    };
+  }
+  public async getSubImpByBoardIdAndStories(
+    boardId: number,
+    ...storyIds: number[]
+  ) {
+    const issueData = await this.jiraService.getSubImpByBoardID(
+      this.configService.get<string>('WORKER_JR_USERNAME'),
+      this.configService.get<string>('WORKER_JR_PASSWORD'),
+      boardId,
+      storyIds,
+    );
+
+    const story: Record<
+      TJiraIssue['key'],
+      TJiraIssue & {
+        subImplAssigned: TJiraIssue['key'][];
+        subImplUnassigned: TJiraIssue['key'][];
+      }
+    > = {};
+    const subImplAssigned: Record<TJiraIssue['key'], TJiraIssue> = {};
+    const subImplUnassigned: Record<TJiraIssue['key'], TJiraIssue> = {};
+
+    issueData.issues.forEach((issue) => {
+      const issueParent = issue.fields.parent;
+      if (!story[issueParent.key]) {
+        story[issueParent.key] = {
+          ...issueParent,
+          subImplAssigned: [],
+          subImplUnassigned: [],
+        };
+      }
+
+      if (issue.fields.assignee) {
+        // Sub-Impl assigned
+        subImplAssigned[issue.key] = issue;
+        story[issueParent.key].subImplAssigned.push(issue.key);
+      } else {
+        // Sub-Impl unassigned
+        subImplUnassigned[issue.key] = issue;
+        story[issueParent.key].subImplUnassigned.push(issue.key);
+      }
+    });
+
+    return {
+      story,
+      subImplAssigned,
+      subImplUnassigned,
     };
   }
 }

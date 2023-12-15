@@ -20,3 +20,6 @@ export const APM_MEMBERS: Record<string, string> = {
 };
 
 export const DS_NAME_START_WITH = 'apm: daily scrum';
+export const ISSUE_TYPE__STORY_ID = '10001';
+export const ISSUE_TYPE__SUB_IMP_ID = '10379';
+export const STATUS_TYPE__TODO_ID = '10001';

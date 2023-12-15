@@ -1,6 +1,7 @@
 import { JiraAuthDTO } from 'src/app/dto';
 import { TArrayElement } from 'types';
 import { TSprintJira } from 'types/jira';
+import { TStoryTodo } from 'types/jira/issue.type';
 
 export type TSummaryWorklog = {
   accountId: string;
@@ -46,4 +47,12 @@ export interface IJiraHandlersService {
     issueData: TSummaryIssueData;
     sprint: TSprintJira;
   }>;
+  getStoriesTodoByBoardId(boardId: number): Promise<{
+    remainCount: number;
+    data: TStoryTodo[];
+  }>;
+  getSubImpByBoardIdAndStories(
+    boardId: number,
+    ...storyIds: number[]
+  ): Promise<any>;
 }

@@ -197,6 +197,43 @@ export class JiraService implements IJiraService {
     }
   }
 
+  public async getStoriesTodoByBoardID(
+    u: string,
+    p: string,
+    boardId: number,
+  ): Promise<TIssuePagination> {
+    try {
+      const res = await this.request<AxiosResponse<TIssuePagination>>(
+        JIRA_API.issue.ALL_STORIES_TODO(boardId),
+        { username: u, password: p },
+      );
+
+      return res.data;
+    } catch (error) {
+      console.error(`Error when get todo-stories by board#${boardId}:`, error);
+      throw error;
+    }
+  }
+
+  public async getSubImpByBoardID(
+    u: string,
+    p: string,
+    boardId: number,
+    storyIds: number[],
+  ): Promise<TIssuePagination> {
+    try {
+      const res = await this.request<AxiosResponse<TIssuePagination>>(
+        JIRA_API.issue.ALL_SUB_IMP_BY_BOARD(boardId, storyIds),
+        { username: u, password: p },
+      );
+
+      return res.data;
+    } catch (error) {
+      console.error(`Error when get sub-Imp by board#${boardId}:`, error);
+      throw error;
+    }
+  }
+
   public async getSprintByID(
     u: string,
     p: string,

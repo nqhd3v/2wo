@@ -27,10 +27,12 @@ import {
   CreateGEventsDTO,
   GEventAttendeeResStatusEnum,
 } from './dto/google-event.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class AppController {
   constructor(
+    private readonly configService: ConfigService,
     @Inject(EVENT_SERVICE)
     private readonly eventService: IEventService,
     @Inject(JIRA_SERVICE)
@@ -40,6 +42,30 @@ export class AppController {
     @Inject(FIREBASE_SERVICE)
     private readonly firebaseService: IFirebaseService,
   ) {}
+
+  @Post('tmp')
+  public async getIssue() {
+    return await this.jiraService.getSubImpByBoardID(
+      this.configService.get<string>('WORKER_JR_USERNAME'),
+      this.configService.get<string>('WORKER_JR_PASSWORD'),
+      this.configService.get<number>('WORKER_JR_BOARD_ID'),
+    );
+  }
+
+  @Get('think-working/planning/stories')
+  public async getStoriesTodo() {
+    return await this.jiraHandlerService.getStoriesTodoByBoardId(809);
+  }
+
+  @Post('think-working/planning/sub-imp')
+  public async getStoriesWithSubImp(
+    @Body() { storyIds }: { storyIds: number[] },
+  ) {
+    return await this.jiraHandlerService.getSubImpByBoardIdAndStories(
+      this.configService.get<number>('WORKER_JR_BOARD_ID'),
+      ...storyIds,
+    );
+  }
 
   @Get('meetings/daily-scrum')
   public async triggerDailyScrumEvent() {
@@ -104,6 +130,11 @@ export class AppController {
       );
       return acc;
     }, {});
+  }
+
+  @Post('worklog-summary/date/send')
+  public async sendDailyWorklogSummary(@Query('date') date: string) {
+    return await this.eventService.sendDailyWorklogSummary(date);
   }
 
   @Post('worklog-summary/sprint/send')

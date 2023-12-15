@@ -1,4 +1,4 @@
-import { TPaginationJira } from '.';
+import { TAuthorJira, TPaginationJira } from '.';
 import { TWorklogPagination } from './worklog.type';
 
 export type TIssuePagination = Omit<TPaginationJira<TJiraIssue>, 'values'> & {
@@ -11,13 +11,17 @@ export type TJiraIssue = {
   key: string; // 'APM-2678'
   fields: {
     summary: string;
+    parent: TJiraIssue;
     status: TJiraStatus;
     priority: TJiraPriority;
     worklog: TWorklogPagination;
     timetracking: TJiraTimeTracking;
     issuetype: TJiraIssueType;
+    assignee: TAuthorJira;
   };
 };
+
+export type TJiraIssueStory = TJiraIssue & { issues: TJiraIssue['id'][] };
 
 export type TJiraPriority = {
   self: string;
@@ -59,4 +63,11 @@ export type TJiraIssueType = {
   subtask: boolean;
   avatarId: number;
   hierarchyLevel: number;
+};
+
+export type TStoryTodo = {
+  id: TJiraIssue['id'];
+  key: TJiraIssue['key'];
+  summary: TJiraIssue['fields']['summary'];
+  timetracking: TJiraIssue['fields']['timetracking'];
 };
