@@ -8,6 +8,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { formatErrors } from 'helpers/error.helper';
+import { AppGuard } from './app/app.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,7 +26,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['http://localhost:5000', 'https://*.nqhuy.dev'],
+    origin: ['http://localhost:3000', 'https://*.nqhuy.dev'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   });
 

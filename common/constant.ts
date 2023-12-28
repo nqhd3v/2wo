@@ -7,10 +7,10 @@ export const APM_MEMBERS: Record<string, string> = {
   'hai.tt': '100581258925722973621',
   'dinh.do': '106338020966278855849',
   'nguyen.do': '106154930611213430992',
-  'quang.ha': 'quang.ha.tpv@one-line.com',
+  'quang.ha': 'c5829613034450033472',
   'tri.phan': '118395313760843167802',
   // QCs
-  'chau.cao': '',
+  'chau.cao': 'c753225313618599970',
   'hong.nguyen': '115228488730116806738',
   'ngan.hoang': '107475417155763631398',
   'ut.tran': '118280760019709117434',

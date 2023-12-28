@@ -7,7 +7,7 @@ import { JiraModule } from './jira/jira.module';
 import { DiscordModule } from './discord/discord.module';
 import * as Joi from 'joi';
 import { FirebaseModule } from './firebase/firebase.module';
-import { FIREBASE_PROVIDER, FirebaseProvider } from './app/firebase.provider';
+import { AppGuard } from './app/app.guard';
 
 @Module({
   imports: [
@@ -26,6 +26,7 @@ import { FIREBASE_PROVIDER, FirebaseProvider } from './app/firebase.provider';
         FIREBASE_AUTH_CERT_URL: Joi.string().required(),
         FIREBASE_CLIENT_CERT_URL: Joi.string().required(),
         FIREBASE_UNIVERSAL_DOMAIN: Joi.string().required(),
+        API_PASS: Joi.string().required(),
       }),
     }),
     EventsModule,
@@ -33,5 +34,6 @@ import { FIREBASE_PROVIDER, FirebaseProvider } from './app/firebase.provider';
     DiscordModule,
   ],
   controllers: [AppController],
+  providers: [AppGuard],
 })
 export class AppModule {}

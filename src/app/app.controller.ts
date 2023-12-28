@@ -7,6 +7,7 @@ import {
   Query,
   BadRequestException,
   Get,
+  UseGuards,
 } from '@nestjs/common';
 // import { AppService } from './app.service';
 // import { IJiraService, JIRA_SERVICE } from 'src/jira/interfaces';
@@ -28,6 +29,7 @@ import {
   GEventAttendeeResStatusEnum,
 } from './dto/google-event.dto';
 import { ConfigService } from '@nestjs/config';
+import { AppGuard } from './app.guard';
 
 @Controller()
 export class AppController {
@@ -52,11 +54,22 @@ export class AppController {
     );
   }
 
+  @Post('myself')
+  public async initConnect(@Body() auth: JiraAuthDTO) {
+    const currentUser = await this.jiraService.getMyself(
+      auth.username,
+      auth.accessToken,
+    );
+    return currentUser;
+  }
+
+  @UseGuards(AppGuard)
   @Get('think-working/planning/stories')
   public async getStoriesTodo() {
     return await this.jiraHandlerService.getStoriesTodoByBoardId(809);
   }
 
+  @UseGuards(AppGuard)
   @Post('think-working/planning/sub-imp')
   public async getStoriesWithSubImp(
     @Body() { storyIds }: { storyIds: number[] },
@@ -67,11 +80,13 @@ export class AppController {
     );
   }
 
+  @UseGuards(AppGuard)
   @Get('meetings/daily-scrum')
   public async triggerDailyScrumEvent() {
     return await this.eventService.sendDailyScrumMeeting();
   }
 
+  @UseGuards(AppGuard)
   @Post('meetings/daily-scrum')
   public async createDailyScrumEvent(@Body() { events }: CreateGEventsDTO) {
     if (events.length === 0) throw new BadRequestException('No Event found!');
@@ -91,6 +106,7 @@ export class AppController {
     return newEvent;
   }
 
+  @UseGuards(AppGuard)
   @Post('myself')
   public async getMyWorklogSummary(@Body() auth: JiraAuthDTO) {
     const currentUser = await this.jiraService.getMyself(
@@ -100,6 +116,7 @@ export class AppController {
     return currentUser;
   }
 
+  @UseGuards(AppGuard)
   @Post('worklog-summary/:boardId')
   public async worklogSummaryBoardID(
     @Param('boardId') boardId: string,
@@ -132,11 +149,13 @@ export class AppController {
     }, {});
   }
 
+  @UseGuards(AppGuard)
   @Post('worklog-summary/date/send')
   public async sendDailyWorklogSummary(@Query('date') date: string) {
     return await this.eventService.sendDailyWorklogSummary(date);
   }
 
+  @UseGuards(AppGuard)
   @Post('worklog-summary/sprint/send')
   public async sendSprintWorklogSummary(@Query('sprintId') sprintId: string) {
     return await this.eventService.sendSprintWorklogSummary(
