@@ -32,6 +32,8 @@ Example, I have this URL: **https://twoline.atlassian.net/jira/software/c/projec
 
 > To create your API token, go to [Manage API tokens for your Atlassian account](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/) to read more about your own API token.
 
+In `.env` file, I have a field `API_PASS`, this is a password to allow third-party call to this application.
+
 ## Personal use
 
 I developed some APIs to support for personal case:

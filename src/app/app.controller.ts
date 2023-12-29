@@ -27,6 +27,7 @@ import { IFirebaseService, FIREBASE_SERVICE } from '../firebase/interfaces';
 import {
   CreateGEventsDTO,
   GEventAttendeeResStatusEnum,
+  SyncMemberOffDTO,
 } from './dto/google-event.dto';
 import { ConfigService } from '@nestjs/config';
 import { AppGuard } from './app.guard';
@@ -45,15 +46,13 @@ export class AppController {
     private readonly firebaseService: IFirebaseService,
   ) {}
 
+  @UseGuards(AppGuard)
   @Post('tmp')
   public async getIssue() {
-    return await this.jiraService.getSubImpByBoardID(
-      this.configService.get<string>('WORKER_JR_USERNAME'),
-      this.configService.get<string>('WORKER_JR_PASSWORD'),
-      this.configService.get<number>('WORKER_JR_BOARD_ID'),
-    );
+    return await this.eventService.sendDailyDateOffMember('12_29');
   }
 
+  @UseGuards(AppGuard)
   @Post('myself')
   public async initConnect(@Body() auth: JiraAuthDTO) {
     const currentUser = await this.jiraService.getMyself(
@@ -104,6 +103,16 @@ export class AppController {
     });
 
     return newEvent;
+  }
+
+  @UseGuards(AppGuard)
+  @Post('think-working/planning/date-off')
+  public async syncMemberOffToday(@Body() { data }: SyncMemberOffDTO) {
+    if (data.length === 0) throw new BadRequestException('No DATES found!');
+
+    console.log('-- Receive request to sync date-off', data);
+    const result = await this.firebaseService.syncMemberOffByDates(data);
+    return result;
   }
 
   @UseGuards(AppGuard)

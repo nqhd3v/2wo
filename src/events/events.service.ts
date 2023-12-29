@@ -5,7 +5,6 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
 import { Cron } from '@nestjs/schedule';
 import * as dayjs from 'dayjs';
 import {
@@ -20,6 +19,7 @@ import { FIREBASE_SERVICE, IFirebaseService } from 'src/firebase/interfaces';
 import { randomMember } from 'helpers/random-member';
 import { APM_MEMBERS } from 'common/constant';
 import { generateDailyScrumHost } from 'helpers/daily-meeting-hosted';
+import { generateDailyMemberOff } from 'helpers/daily-member-off';
 
 @Injectable()
 export class EventsService implements IEventService {
@@ -124,6 +124,31 @@ export class EventsService implements IEventService {
     }
   }
 
+  public async sendDailyDateOffMember(date?: string) {
+    try {
+      const data = await this.firebaseService.getDailyMemberOff(date);
+      if (!data) {
+        throw new BadRequestException(`No data date-off for date (${date})`);
+      }
+      if (
+        !Array.isArray(data.full) ||
+        !Array.isArray(data.half) ||
+        !Array.isArray(data.wfh)
+      ) {
+        throw new BadRequestException(`Data is INVALID for date (${date})`);
+      }
+
+      await this.request(
+        generateDailyMemberOff({ date: date.replace('_', '/'), ...data }),
+      );
+
+      return generateDailyMemberOff({ date: date.replace('_', '/'), ...data });
+    } catch (error) {
+      console.error('Error when send report to Google Chat:', error);
+      throw error;
+    }
+  }
+
   public async sendSprintWorklogSummary(sprintId?: number) {
     try {
       const { sprint, worklog } =
@@ -148,6 +173,20 @@ export class EventsService implements IEventService {
       return this.sendDailyScrumMeeting();
     } catch (error) {
       console.error("Error when run cron 'Daily Scrum Meeting':", error);
+      throw error;
+    }
+  }
+
+  @Cron('25 8 * * 1-5', {
+    name: 'date_off_planned',
+    timeZone: 'Asia/Ho_Chi_Minh',
+  })
+  async memberDateOff() {
+    Logger.log(' - Date-off planned for members');
+    try {
+      return this.sendDailyDateOffMember();
+    } catch (error) {
+      console.error("Error when run cron 'Date-Off Planned':", error);
       throw error;
     }
   }

@@ -5,6 +5,7 @@ import {
   IsBoolean,
   ValidateNested,
   IsEnum,
+  IsArray,
 } from 'class-validator';
 
 export enum GEventAttendeeResStatusEnum {
@@ -59,4 +60,24 @@ class AttendeeDTO {
 
   @IsEnum(GEventAttendeeResStatusEnum)
   status: GEventAttendeeResStatusEnum;
+}
+
+export class SyncMemberOffDTO {
+  @ValidateNested()
+  @Type(() => MemberOffDataDTO)
+  data: MemberOffDataDTO[];
+}
+
+class MemberOffDataDTO {
+  @IsArray()
+  full: string[];
+
+  @IsArray()
+  half: string[];
+
+  @IsArray()
+  wfh: string[];
+
+  @IsString()
+  date: string;
 }
