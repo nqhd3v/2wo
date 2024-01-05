@@ -8,7 +8,7 @@ import {
 } from './interfaces/firebase.service.interface';
 import { firestore, app } from 'firebase-admin';
 import { FIREBASE_PROVIDER } from 'src/app/firebase.provider';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class FirebaseService implements IFirebaseService {
