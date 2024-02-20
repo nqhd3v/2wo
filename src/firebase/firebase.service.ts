@@ -3,12 +3,9 @@ import {
   IFirebaseService,
   TDailyEvent,
   TFsDailyEvent,
-  TFsDailyMemberOff,
-  TFsMemberOff,
 } from './interfaces/firebase.service.interface';
 import { firestore, app } from 'firebase-admin';
 import { FIREBASE_PROVIDER } from 'src/app/firebase.provider';
-import * as dayjs from 'dayjs';
 
 @Injectable()
 export class FirebaseService implements IFirebaseService {
@@ -33,30 +30,30 @@ export class FirebaseService implements IFirebaseService {
     return await this.getDailyEvent();
   }
 
-  public async syncMemberOffByDate(
-    date: string,
-    members: string[],
-  ): Promise<TFsDailyMemberOff> {
-    await this._collection
-      .doc('member-date-off')
-      .collection('date-off')
-      .doc(date.replace('/', '_'))
-      .set({ members });
-    return await this.getDailyMemberOff();
-  }
-  public async syncMemberOffByDates(
-    data: { full: string[]; half: string[]; wfh: string[]; date: string }[],
-  ): Promise<TFsMemberOff> {
-    const promises = data.map(async ({ date, ...data }) =>
-      this._collection
-        .doc('member-date-off')
-        .collection('date-off')
-        .doc(date.replace('/', '_'))
-        .set(data),
-    );
-    await Promise.all(promises);
-    return await this.getDatesMemberOff();
-  }
+  // public async syncMemberOffByDate(
+  //   date: string,
+  //   members: string[],
+  // ): Promise<TFsDailyMemberOff> {
+  //   await this._collection
+  //     .doc('member-date-off')
+  //     .collection('date-off')
+  //     .doc(date.replace('/', '_'))
+  //     .set({ members });
+  //   return await this.getDailyMemberOff();
+  // }
+  // public async syncMemberOffByDates(
+  //   data: { full: string[]; half: string[]; wfh: string[]; date: string }[],
+  // ): Promise<TFsMemberOff> {
+  //   const promises = data.map(async ({ date, ...data }) =>
+  //     this._collection
+  //       .doc('member-date-off')
+  //       .collection('date-off')
+  //       .doc(date.replace('/', '_'))
+  //       .set(data),
+  //   );
+  //   await Promise.all(promises);
+  //   return await this.getDatesMemberOff();
+  // }
 
   public async getDailyEvent(): Promise<TFsDailyEvent | null> {
     const dailyDoc = await this._collection.doc('daily-event').get();
@@ -67,32 +64,32 @@ export class FirebaseService implements IFirebaseService {
     return dailyDoc.data() as TFsDailyEvent;
   }
 
-  public async getDailyMemberOff(date?: string): Promise<TFsDailyMemberOff> {
-    const today = date || dayjs().format('MM_DD');
-    const dailyDoc = await this._collection
-      .doc('member-date-off')
-      .collection('date-off')
-      .doc(today)
-      .get();
+  // public async getDailyMemberOff(date?: string): Promise<TFsDailyMemberOff> {
+  //   const today = date || dayjs().format('MM_DD');
+  //   const dailyDoc = await this._collection
+  //     .doc('member-date-off')
+  //     .collection('date-off')
+  //     .doc(today)
+  //     .get();
 
-    if (!dailyDoc.exists) return null;
+  //   if (!dailyDoc.exists) return null;
 
-    return dailyDoc.data() as TFsDailyMemberOff;
-  }
+  //   return dailyDoc.data() as TFsDailyMemberOff;
+  // }
 
-  public async getDatesMemberOff(): Promise<TFsMemberOff> {
-    const dateSnapshot = await this._collection
-      .doc('member-date-off')
-      .collection('date-off')
-      .get();
+  // public async getDatesMemberOff(): Promise<TFsMemberOff> {
+  //   const dateSnapshot = await this._collection
+  //     .doc('member-date-off')
+  //     .collection('date-off')
+  //     .get();
 
-    const res: TFsMemberOff = {};
-    dateSnapshot.forEach((d) => {
-      res[d.id] = d.data().members || [];
-    });
+  //   const res: TFsMemberOff = {};
+  //   dateSnapshot.forEach((d) => {
+  //     res[d.id] = d.data().members || [];
+  //   });
 
-    return res;
-  }
+  //   return res;
+  // }
 
   public async updateDailyEvent(e: Partial<TDailyEvent>) {
     await this._collection.doc('daily-event').set(e, { merge: true });

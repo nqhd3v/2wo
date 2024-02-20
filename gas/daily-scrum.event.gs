@@ -1,7 +1,7 @@
 const DAILY_MEETING_NAMES_CHECK = ['apm', 'daily scrum'];
 
 async function getDailyEventInDate() {
-  // const timeMin = new Date().toISOString();
+
   const timeMin = startOfDay();
   const timeMax = endOfDay();
   console.log('------------------ SYNC EVENTS ------------------');

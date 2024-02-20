@@ -4,15 +4,15 @@ export interface IFirebaseService {
   createDailyEvent(
     e: Omit<TDailyEvent, 'exclude'>,
   ): Promise<TFsDailyEvent | null>;
-  syncMemberOffByDate(
-    date: string,
-    members: string[],
-  ): Promise<TFsDailyMemberOff | null>;
-  syncMemberOffByDates(
-    data: { full: string[]; half: string[]; wfh: string[]; date: string }[],
-  ): Promise<TFsMemberOff>;
+  // syncMemberOffByDate(
+  //   date: string,
+  //   members: string[],
+  // ): Promise<TFsDailyMemberOff | null>;
+  // syncMemberOffByDates(
+  //   data: { full: string[]; half: string[]; wfh: string[]; date: string }[],
+  // ): Promise<TFsMemberOff>;
   updateDailyEvent(e: Partial<TDailyEvent>): Promise<TFsDailyEvent>;
-  getDailyMemberOff(date?: string): Promise<TFsDailyMemberOff | null>;
+  // getDailyMemberOff(date?: string): Promise<TFsDailyMemberOff | null>;
   getDailyEvent(): Promise<TFsDailyEvent | null>;
 }
 

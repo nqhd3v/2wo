@@ -124,45 +124,32 @@ export class EventsService implements IEventService {
     }
   }
 
-  public async sendDailyDateOffMember(date?: string) {
-    try {
-      const data = await this.firebaseService.getDailyMemberOff(date);
-      if (!data) {
-        throw new BadRequestException(`No data date-off for date (${date})`);
-      }
-      if (
-        !Array.isArray(data.full) ||
-        !Array.isArray(data.half) ||
-        !Array.isArray(data.wfh)
-      ) {
-        throw new BadRequestException(`Data is INVALID for date (${date})`);
-      }
+  // public async sendDailyDateOffMember(date?: string) {
+  //   try {
+  //     const data = await this.firebaseService.getDailyMemberOff(date);
+  //     if (!data) {
+  //       throw new BadRequestException(`No data date-off for date (${date})`);
+  //     }
+  //     if (
+  //       !Array.isArray(data.full) ||
+  //       !Array.isArray(data.half) ||
+  //       !Array.isArray(data.wfh)
+  //     ) {
+  //       throw new BadRequestException(`Data is INVALID for date (${date})`);
+  //     }
 
-      await this.request(
-        generateDailyMemberOff({ date: date.replace('_', '/'), ...data }),
-      );
+  //     await this.request(
+  //       generateDailyMemberOff({ date: date.replace('_', '/'), ...data }),
+  //     );
 
-      return generateDailyMemberOff({ date: date.replace('_', '/'), ...data });
-    } catch (error) {
-      console.error('Error when send report to Google Chat:', error);
-      throw error;
-    }
-  }
+  //     return generateDailyMemberOff({ date: date.replace('_', '/'), ...data });
+  //   } catch (error) {
+  //     console.error('Error when send report to Google Chat:', error);
+  //     throw error;
+  //   }
+  // }
 
-  public async sendSprintWorklogSummary(sprintId?: number) {
-    try {
-      const { sprint, worklog } =
-        await this.eventHandlerService.sprintWorklogReport(sprintId);
-
-      await this.request(generateWorklogReport(sprint, worklog));
-
-      return generateWorklogReport(sprint, worklog);
-    } catch (error) {
-      console.error('Error when send report to Google Chat:', error);
-      throw error;
-    }
-  }
-
+  // JOBS --
   @Cron('30 8 * * 1-5', {
     name: 'daily_scrum_meeting',
     timeZone: 'Asia/Ho_Chi_Minh',
@@ -177,19 +164,19 @@ export class EventsService implements IEventService {
     }
   }
 
-  @Cron('1 9 * * 1-5', {
-    name: 'date_off_planned',
-    timeZone: 'Asia/Ho_Chi_Minh',
-  })
-  async memberDateOff() {
-    Logger.log(' - Date-off planned for members');
-    try {
-      return this.sendDailyDateOffMember();
-    } catch (error) {
-      console.error("Error when run cron 'Date-Off Planned':", error);
-      throw error;
-    }
-  }
+  // @Cron('1 9 * * 1-5', {
+  //   name: 'date_off_planned',
+  //   timeZone: 'Asia/Ho_Chi_Minh',
+  // })
+  // async memberDateOff() {
+  //   Logger.log(' - Date-off planned for members');
+  //   try {
+  //     return this.sendDailyDateOffMember();
+  //   } catch (error) {
+  //     console.error("Error when run cron 'Date-Off Planned':", error);
+  //     throw error;
+  //   }
+  // }
 
   @Cron('15 17 * * 1-5', {
     name: 'daily_report_worklog',

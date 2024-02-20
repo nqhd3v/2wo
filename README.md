@@ -34,21 +34,57 @@ Example, I have this URL: **https://twoline.atlassian.net/jira/software/c/projec
 
 In `.env` file, I have a field `API_PASS`, this is a password to allow third-party call to this application.
 
-## Personal use
+## Setup app
 
-I developed some APIs to support for personal case:
+In this application, below is the structure, to describe how this app works:
 
-- Summary your worklog by date or by member: `[POST] - /worklog-summary/:boardID?date={DATE}&accountId={ACCOUNT_ID}`.
-- Some others is in Development mode
+- **DAILY SCRUM MEETING:**
+  - Everyday, GAS will call to your Calendar to check if today has a DS meeting or not, if exists -> It send a HTTP request to NodeJS server to create/update it (this info will be saved to the Firestore).
+  - I have a job on NodeJS server to check event on Firestore and send a message to GChat with webhook
+- **DAILY LOGWORK REPORT:** Everyday, NodeJS server has a job to call to JIRA (with JIRA APIs) to summary worklog and send a message to GChat with webhook.
 
-In your request's body, pls send with your authenticate data:
+### Firebase
 
-```json
-{
-  "username": "JIRA_USERNAME",
-  "accessToken": "JIRA_PASSWORD_OR_API_TOKEN"
-}
+Setup firebase app and update `.env` file
+
+### Server
+
+```bash
+$ npm install
+
+$ npm run start:dev
+
+$ npm run start
 ```
+
+Expose an IP, or hostname to allow to call API from outside.
+
+Open terminal and run this cURL to get pass (`headers[content-work]`): (Replace `API_PASS` with your API_PASS in `.env` file)
+
+```bash
+curl --location 'http://localhost:5010/meetings/daily-scrum' \
+--header '-x-content-work-example: {API_PASS}'
+```
+
+on your server should log a line like this
+
+```log
+[Nest] 4785  - 02/18/2024, 3:39:20 PM     LOG PASS - "$2a$15$SZ.SOMETHING.SOMETHING.4q"
+```
+
+And now, `$2a$15$SZ.SOMETHING.SOMETHING.4q` is your API TOKEN. Set it as header property (`content-work`) to send request for the next time.
+
+### Google App Script
+
+1. Open GAS and create a new project
+2. Copy and paste files in folder `gas`
+3. In Google App Script, go to `Trigger` section and set time to run `getDailyEventInDate` function (daily, hourly,...).
+
+In your project:
+
+- open `utils.gs` file, update API URL at line `23` and `36`.
+- Open `Settings` section and create a new Script Property:
+  - Field `API_TOKEN` with value is your API token (setup in the before section).
 
 ## API references
 

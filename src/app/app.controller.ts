@@ -1,6 +1,5 @@
 import {
   Controller,
-  Param,
   Post,
   Inject,
   Body,
@@ -9,25 +8,17 @@ import {
   Get,
   UseGuards,
 } from '@nestjs/common';
-// import { AppService } from './app.service';
-// import { IJiraService, JIRA_SERVICE } from 'src/jira/interfaces';
-import {
-  IJiraHandlersService,
-  JIRA_HANDLERS_SERVICE,
-  TSummaryIssueData,
-  TSummaryWorkLogResponse,
-  TSummaryWorklogDataByDate,
-} from 'src/jira/interfaces/jira-handler.service.interface';
+// import {
+//   IJiraHandlersService,
+//   JIRA_HANDLERS_SERVICE,
+// } from 'src/jira/interfaces/jira-handler.service.interface';
 import { JiraAuthDTO } from './dto';
-import { arrayToDictionary } from 'helpers/array-to-dictionary';
-import { TArrayElement, TValueOf } from 'types';
 import { IJiraService, JIRA_SERVICE } from 'src/jira/interfaces';
 import { EVENT_SERVICE, IEventService } from 'src/events/interfaces';
 import { IFirebaseService, FIREBASE_SERVICE } from '../firebase/interfaces';
 import {
   CreateGEventsDTO,
   GEventAttendeeResStatusEnum,
-  SyncMemberOffDTO,
 } from './dto/google-event.dto';
 import { ConfigService } from '@nestjs/config';
 import { AppGuard } from './app.guard';
@@ -40,17 +31,11 @@ export class AppController {
     private readonly eventService: IEventService,
     @Inject(JIRA_SERVICE)
     private readonly jiraService: IJiraService,
-    @Inject(JIRA_HANDLERS_SERVICE)
-    private readonly jiraHandlerService: IJiraHandlersService,
+    // @Inject(JIRA_HANDLERS_SERVICE)
+    // private readonly jiraHandlerService: IJiraHandlersService,
     @Inject(FIREBASE_SERVICE)
     private readonly firebaseService: IFirebaseService,
   ) {}
-
-  @UseGuards(AppGuard)
-  @Post('tmp')
-  public async getIssue() {
-    return await this.eventService.sendDailyDateOffMember('12_29');
-  }
 
   @UseGuards(AppGuard)
   @Post('myself')
@@ -62,29 +47,14 @@ export class AppController {
     return currentUser;
   }
 
-  @UseGuards(AppGuard)
-  @Get('think-working/planning/stories')
-  public async getStoriesTodo() {
-    return await this.jiraHandlerService.getStoriesTodoByBoardId(809);
-  }
-
-  @UseGuards(AppGuard)
-  @Post('think-working/planning/sub-imp')
-  public async getStoriesWithSubImp(
-    @Body() { storyIds }: { storyIds: number[] },
-  ) {
-    return await this.jiraHandlerService.getSubImpByBoardIdAndStories(
-      this.configService.get<number>('WORKER_JR_BOARD_ID'),
-      ...storyIds,
-    );
-  }
-
+  // manual trigger daily scrum
   @UseGuards(AppGuard)
   @Get('meetings/daily-scrum')
   public async triggerDailyScrumEvent() {
     return await this.eventService.sendDailyScrumMeeting();
   }
 
+  // update daily-scrum for today
   @UseGuards(AppGuard)
   @Post('meetings/daily-scrum')
   public async createDailyScrumEvent(@Body() { events }: CreateGEventsDTO) {
@@ -105,114 +75,10 @@ export class AppController {
     return newEvent;
   }
 
+  // manual trigger daily-report logwork
   @UseGuards(AppGuard)
-  @Post('think-working/planning/date-off')
-  public async syncMemberOffToday(@Body() { data }: SyncMemberOffDTO) {
-    if (data.length === 0) throw new BadRequestException('No DATES found!');
-
-    console.log('-- Receive request to sync date-off', data);
-    const result = await this.firebaseService.syncMemberOffByDates(data);
-    return result;
-  }
-
-  @UseGuards(AppGuard)
-  @Post('myself')
-  public async getMyWorklogSummary(@Body() auth: JiraAuthDTO) {
-    const currentUser = await this.jiraService.getMyself(
-      auth.username,
-      auth.accessToken,
-    );
-    return currentUser;
-  }
-
-  @UseGuards(AppGuard)
-  @Post('worklog-summary/:boardId')
-  public async worklogSummaryBoardID(
-    @Param('boardId') boardId: string,
-    @Query('date') date: string,
-    @Query('accountId') accountId: string,
-    @Body() auth: JiraAuthDTO,
-  ) {
-    const { worklogData, issueData } =
-      await this.jiraHandlerService.mySummaryWorklog(auth, Number(boardId));
-    const issueDic = arrayToDictionary(issueData, 'key');
-    if (date) {
-      const worklogsByDate = worklogData[date];
-      if (!worklogsByDate) return { [date]: {} };
-      return {
-        [date]: this.transformWorklogWithIssueData(
-          worklogsByDate,
-          issueDic,
-          accountId,
-        ),
-      };
-    }
-
-    return Object.keys(worklogData).reduce((acc, date) => {
-      acc[date] = this.transformWorklogWithIssueData(
-        worklogData[date],
-        issueDic,
-        accountId,
-      );
-      return acc;
-    }, {});
-  }
-
-  @UseGuards(AppGuard)
-  @Post('worklog-summary/date/send')
+  @Get('worklog-summary/date/send')
   public async sendDailyWorklogSummary(@Query('date') date: string) {
     return await this.eventService.sendDailyWorklogSummary(date);
-  }
-
-  @UseGuards(AppGuard)
-  @Post('worklog-summary/sprint/send')
-  public async sendSprintWorklogSummary(@Query('sprintId') sprintId: string) {
-    return await this.eventService.sendSprintWorklogSummary(
-      sprintId && Number(sprintId),
-    );
-  }
-
-  private transformWorklogWithIssueData(
-    worklogByAccount: TValueOf<TSummaryWorklogDataByDate>,
-    issueDic: Record<string, TArrayElement<TSummaryIssueData>>,
-    onlyAccountId?: string,
-  ): TSummaryWorkLogResponse {
-    if (onlyAccountId) {
-      const worklogByAccountId = worklogByAccount[onlyAccountId];
-      if (!worklogByAccountId) return { [onlyAccountId]: undefined };
-      const worklogDataByIssue: TValueOf<TSummaryWorkLogResponse>['details'] =
-        {};
-
-      Object.keys(worklogByAccountId.details).forEach((issueKey) => {
-        worklogDataByIssue[issueKey] = {
-          summary: issueDic[issueKey].summary,
-          timeSpentSeconds: worklogByAccountId.details[issueKey],
-        };
-      });
-      return {
-        [onlyAccountId]: {
-          ...worklogByAccountId,
-          details: worklogDataByIssue,
-        },
-      };
-    }
-    return Object.keys(worklogByAccount).reduce((acc, accountId) => {
-      const { details: timeSpentByIssue } = worklogByAccount[accountId];
-      const worklogDataByIssue: TValueOf<TSummaryWorkLogResponse>['details'] =
-        {};
-
-      Object.keys(timeSpentByIssue).forEach((issueKey) => {
-        worklogDataByIssue[issueKey] = {
-          summary: issueDic[issueKey].summary,
-          timeSpentSeconds: timeSpentByIssue[issueKey],
-        };
-      });
-      acc[accountId] = {
-        ...worklogByAccount[accountId],
-        details: worklogDataByIssue,
-      };
-
-      return acc;
-    }, {});
   }
 }

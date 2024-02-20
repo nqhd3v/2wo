@@ -1,10 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app/app.controller';
-import { WorkersModule } from './workers/workers.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
 import { JiraModule } from './jira/jira.module';
-import { DiscordModule } from './discord/discord.module';
 import * as Joi from 'joi';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AppGuard } from './app/app.guard';
@@ -12,7 +10,6 @@ import { AppGuard } from './app/app.guard';
 @Module({
   imports: [
     FirebaseModule,
-    WorkersModule,
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         PORT: Joi.number().required(),
@@ -31,7 +28,6 @@ import { AppGuard } from './app/app.guard';
     }),
     EventsModule,
     JiraModule,
-    DiscordModule,
   ],
   controllers: [AppController],
   providers: [AppGuard],
