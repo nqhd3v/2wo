@@ -38,6 +38,9 @@ In `.env` file, I have a field `API_PASS`, this is a password to allow third-par
 
 In this application, below is the structure, to describe how this app works:
 
+<img width="925" alt="image" src="https://github.com/nqhd3v/2wo/assets/106160187/510a54a2-a0f6-42ce-aba0-7ef85c3a0d25">
+
+
 - **DAILY SCRUM MEETING:**
   - Everyday, GAS will call to your Calendar to check if today has a DS meeting or not, if exists -> It send a HTTP request to NodeJS server to create/update it (this info will be saved to the Firestore).
   - I have a job on NodeJS server to check event on Firestore and send a message to GChat with webhook
